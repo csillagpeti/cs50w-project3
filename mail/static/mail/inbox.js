@@ -29,6 +29,7 @@ document.addEventListener("DOMContentLoaded", function () {
 function compose_email() {
   // Show compose view and hide other views
   document.querySelector("#emails-view").style.display = "none";
+  document.querySelector("#maildetail-view").style.display = "none";
   document.querySelector("#compose-view").style.display = "block";
 
   // Clear out composition fields
@@ -41,11 +42,14 @@ function load_mailbox(mailbox) {
   // Show the mailbox and hide other views
   document.querySelector("#emails-view").style.display = "block";
   document.querySelector("#compose-view").style.display = "none";
+  document.querySelector("#maildetail-view").style.display = "none";
 
   // Show the mailbox name
   document.querySelector("#emails-view").innerHTML = `<h3>${
     mailbox.charAt(0).toUpperCase() + mailbox.slice(1)
   }</h3>`;
+
+  const emailsview = document.querySelector("#emails-view");
 
   fetch(`/emails/${mailbox}`)
     .then((response) => response.json())
@@ -53,6 +57,26 @@ function load_mailbox(mailbox) {
       console.log(emails);
       emails.forEach((email) => {
         console.log(email.body);
+        const mailDiv = document.createElement("div");
+        mailDiv.className = "mail";
+        const emailLink = document.createElement("a");
+        emailLink.href = `/emails/${email.id}`
+        emailLink.appendChild(mailDiv)
+        email.read ? mailDiv.style.backgroundColor = 'lightgrey' : mailDiv.style.backgroundColor = 'white';
+        const fromListItem = document.createElement("li");
+        const subjectListItem = document.createElement("li");
+        const timeStampListItem = document.createElement("li");
+        fromListItem.innerHTML = email.sender;
+        subjectListItem.innerHTML = email.subject;
+        timeStampListItem.innerHTML = email.timestamp;
+        mailDiv.appendChild(fromListItem);
+        mailDiv.appendChild(subjectListItem);
+        mailDiv.appendChild(timeStampListItem);
+        emailsview.appendChild(emailLink);
+        emailLink.addEventListener('click', function(event) {
+          event.preventDefault();
+          load_maildetail(email.id);
+        })
       });
     });
 }
@@ -69,8 +93,25 @@ function send_email(recipients, subject, body) {
   })
     .then((response) => response.json())
     .then((result) => {
-      // Print result
       console.log(result);
-      console.log(3);
     });
+}
+
+function cleanup(){
+  mails = document.querySelectorAll(".mail");
+  mails.forEach(mail => {
+    mail.remove()
+  })
+}
+
+function load_maildetail(mailId){
+  document.querySelector("#emails-view").style.display = "none";
+  document.querySelector("#compose-view").style.display = "none";
+  document.querySelector("#maildetail-view").style.display = "block";
+
+  fetch(`/emails/${mailId}`)
+.then((response) => response.json())
+.then(email => {
+  console.log(email);
+})
 }
