@@ -6,12 +6,39 @@ textarea {
     min-height: 400px;
 }
 
-.mail{
-    margin: 10px;
-    border: solid 1px;
-    padding: 10px;
+span{
+    margin-right: 10px;
 }
 
-.mail li{
+.mail {
+    border: solid 1px;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.subject {
+    text-align: left;
+}
+
+.timestamp {
+    text-align: right;
+    flex-grow: 1;
+    text-align: end;
+    font-style: italic;
+}
+
+.from {
+    font-weight: bold;
+}
+
+li{
     list-style: none;
+}
+
+.archive {
+    background-color: grey;
+    border-color: black;
+    color: white;
 }
