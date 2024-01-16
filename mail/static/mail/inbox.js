@@ -186,7 +186,9 @@ function load_maildetail(mailId) {
       const subjectListItem = document.createElement("li");
       const timeStampListItem = document.createElement("li");
       const replyButton = document.createElement("button");
-      replyButton.className = "actionbutton btn btn-sm btn-outline-primary";
+      const replyAllButton = document.createElement("button");
+      replyButton.className = "reply actionbutton btn btn-sm btn-outline-primary";
+      replyAllButton.className = "replyall actionbutton btn btn-sm btn-outline-primary";
       const hrtag = document.createElement("hr");
       hrtag.className = "mailseparator";
       const bodyListItem = document.createElement("li");
@@ -196,6 +198,7 @@ function load_maildetail(mailId) {
       recipientsListItem.innerHTML = `<b>To: </b>${email.recipients}`;
       subjectListItem.innerHTML = `<b>Subject: </b>${email.subject}`;
       replyButton.innerHTML = `Reply`;
+      replyAllButton.innerHTML = `Reply All`;
       timeStampListItem.innerHTML = `<b>Timestamp:</b>${email.timestamp}`;
       bodyListItem.innerHTML = email.body;
 
@@ -205,6 +208,7 @@ function load_maildetail(mailId) {
       maildetailDiv.appendChild(subjectListItem);
       maildetailDiv.appendChild(timeStampListItem);
       maildetailDiv.appendChild(replyButton);
+      maildetailDiv.appendChild(replyAllButton);
       mailbodyDiv.appendChild(bodyListItem);
       mailDetailContainer.appendChild(maildetailDiv);
       mailDetailContainer.appendChild(hrtag);
@@ -214,7 +218,11 @@ function load_maildetail(mailId) {
       replyButton.addEventListener("click", function () {
         compose_reply(email);
       });
-    });
+
+      replyAllButton.addEventListener("click", function () {
+        compose_replyall(email);
+      });
+    })
 }
 
 function archive(mailId, isArchived) {
@@ -238,21 +246,42 @@ function archive(mailId, isArchived) {
 function compose_reply(email) {
   const currentUserEmail = document.querySelector(".container h2").innerHTML;
 
+  document.querySelector("#emails-view").style.display = "none";
+  document.querySelector("#maildetail-view").style.display = "none";
+  document.querySelector("#compose-view").style.display = "block";
+
+  document.querySelector("#compose-recipients").value = email.sender;
+  const isReplyAlready = email.subject.slice(0, 3) === "Re:";
+  if (!isReplyAlready) {
+    document.querySelector("#compose-subject").value = `Re: ${email.subject}`;
+  } else {
+    document.querySelector("#compose-subject").value = `${email.subject}`;
+  }
+
+  document.querySelector(
+    "#compose-body"
+  ).value = `\n\n\-\-\nOn ${email.timestamp}, ${email.sender} wrote:\n${email.body}`;
+  document.querySelector("#compose-view h3").innerHTML = "Reply Mail";
+
+  const composeBody = document.querySelector("#compose-body");
+  composeBody.focus();
+  composeBody.setSelectionRange(0, 0);
+}
+
+function compose_replyall(email) {
+  const currentUserEmail = document.querySelector(".container h2").innerHTML;
+
   // Show compose view and hide other views
   document.querySelector("#emails-view").style.display = "none";
   document.querySelector("#maildetail-view").style.display = "none";
   document.querySelector("#compose-view").style.display = "block";
 
-  let replyRecipients = email.recipients.filter(
-    (recipient) => recipient !== currentUserEmail
-  );
-
+  let replyRecipients = email.recipients;
   if (
-    email.sender !== currentUserEmail &&
     !replyRecipients.includes(email.sender)
   ) {
     replyRecipients.push(email.sender);
-  }
+  };
 
   // Set composition fields with actual email data
   document.querySelector("#compose-recipients").value =
@@ -266,6 +295,10 @@ function compose_reply(email) {
 
   document.querySelector(
     "#compose-body"
-  ).value = `\n\n---\nOn ${email.timestamp}, ${email.sender} wrote:\n${email.body}`;
+  ).value = `\n\n\-\-\nOn ${email.timestamp}, ${email.sender} wrote:\n${email.body}`;
   document.querySelector("#compose-view h3").innerHTML = "Reply Mail";
+
+  const composeBody = document.querySelector("#compose-body");
+  composeBody.focus();
+  composeBody.setSelectionRange(0, 0);
 }

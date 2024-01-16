@@ -42,3 +42,7 @@ li{
     border-color: black;
     color: white;
 }
+
+.reply {
+    margin-right: 5px;
+}
